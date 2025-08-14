@@ -19,18 +19,15 @@ function App() {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  const API_BASE =
-    import.meta.env.VITE_API_BASE || "https://cloud-check-back-1.onrender.com";
+  // Fallback to Render URL if no .env var found
+  const API_BASE = import.meta.env.VITE_API_BASE;
 
   async function handleSubmit(e) {
     e.preventDefault();
     setStatus({ loading: true, success: null, error: null });
 
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_BASE}/api/contact`,
-        formData
-      );
+      const res = await axios.post(`${API_BASE}/api/contact`, form);
       setStatus({ loading: false, success: res.data.message, error: null });
       setForm({ name: "", email: "", subject: "", message: "" });
     } catch (err) {
