@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
 
@@ -19,22 +19,35 @@ function App() {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  // Fallback to Render URL if no .env var found
-  const API_BASE = import.meta.env.VITE_API_BASE;
+  // ✅ CRA uses process.env.REACT_APP_*
+  const API_BASE =
+    process.env.REACT_APP_API_BASE || "http://localhost:5000";
+
+  useEffect(() => {
+    console.log("API Base:", API_BASE);
+  }, [API_BASE]);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setStatus({ loading: true, success: null, error: null });
 
     try {
-      const res = await axios.post(`${API_BASE}/api/contact`, form);
-      setStatus({ loading: false, success: res.data.message, error: null });
+      // ✅ Make sure the request uses your backend base URL
+      const response = await axios.post(`${API_BASE}/api/contact`, form);
+
+      setStatus({
+        loading: false,
+        success: response.data.message,
+        error: null,
+      });
       setForm({ name: "", email: "", subject: "", message: "" });
-    } catch (err) {
+    } catch (error) {
       setStatus({
         loading: false,
         success: null,
-        error: err.response?.data?.message || "Something went wrong",
+        error: error.response
+          ? error.response.data.message
+          : "An error occurred",
       });
     }
   }
